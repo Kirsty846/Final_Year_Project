@@ -1,0 +1,109 @@
+
+#include <xc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "system.h"
+#include <p33FJ128MC802.h>
+#include <libpic30.h>
+#include <math.h>
+
+int temp;
+int counter=0;
+
+void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt( void );
+void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt( void );
+
+#define DELAY_105uS asm volatile("REPEAT, #4201"); Nop();
+int count=0;
+
+void __attribute__((__interrupt__)) _U1TXInterrupt(void)         //if interrput on sending data clear flag and send coordinates
+{
+IFS0bits.U1TXIF = 0;
+if(PORTAbits.RA0==1)
+{
+U1TXREG =48;
+}
+else if(PORTAbits.RA1==1)
+{
+U1TXREG =50;
+}
+else if(PORTAbits.RA2==1)
+{
+U1TXREG =52;
+}
+else if(PORTAbits.RA4==1)
+{
+U1TXREG =54;
+}
+else
+{
+    IFS0bits.U1TXIF = 1;
+}
+}
+
+int main(int argc, char** argv) {
+
+AD1PCFGL=0xffff;        //makes them digital
+TRISB =0x0000;
+PORTB=0xf000;            //0=output
+TRISA =0xffff;		//1=INPUT
+
+PLLFBD = 41;            //M=41+2 =43
+CLKDIVbits.PLLPOST =0;  //N=2
+CLKDIVbits.PLLPRE =0;   //N=2
+//FOSC = 7.37*(M/(N1*N2)) = 80MHz
+//FCY= FOSC/2 = 40MHz;
+ __builtin_write_OSCCONH(0x01);			/* New Oscillator FRC w/ PLL */
+ __builtin_write_OSCCONL(0x01);  		/* Enable Switch */
+
+	while(OSCCONbits.COSC != 0b001);		/* Wait for new Oscillator to become FRC w/ PLL */
+    while(OSCCONbits.LOCK != 1);			/* Wait for Pll to Lock */
+ //   PWM period = Tcy * prescale * PTPER
+ //   PWM pulse width = (Tcy/2) * prescale * PDC
+
+ int ii=0;
+    if(ii==0)
+    {
+//allow I/O to be changed
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bclr OSCCON, #6");
+
+        //assign uart1 to rp6
+        //u1tx to rp6 (b6)or pin 15
+	RPINR18bits.U1RXR = 7;      //0x0006 0110
+	RPOR3bits.RP6R = 0b00011;
+	//disallow I/O changes
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bset OSCCON, #6");
+
+        U1MODEbits.STSEL = 0; // 1-Stop bit
+U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
+U1MODEbits.ABAUD = 0; // Auto-Baud disabled
+U1MODEbits.BRGH = 0; // Standard-Speed mode
+U1BRG = 259; // Baud Rate setting for 9600
+U1STAbits.UTXISEL0 = 0; // Interrupt after one TX character is transmitted
+U1STAbits.UTXISEL1 = 0;
+U1STAbits.UTXINV = 1; // INVERT
+IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
+U1MODEbits.UARTEN = 1; // Enable UART
+U1STAbits.UTXEN = 1; // Enable UART TX
+/* Wait at least 105 microseconds (1/9600) before sending first char */
+DELAY_105uS
+    }
+
+
+while(1)
+{
+}
+
+}
+
+

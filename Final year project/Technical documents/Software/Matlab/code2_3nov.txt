@@ -1,0 +1,115 @@
+
+#include <xc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "system.h"
+#include <p33FJ128MC802.h>
+#include <libpic30.h>
+#include <math.h>
+
+double speed=0;
+int step_count1;
+int step_count2;
+
+
+int step1[8]={0,0,0,0,0,1,1,1};
+int step2[8]={0,0,0,1,1,1,0,0};
+int step3[8]={0,1,1,1,0,0,0,0};
+int step4[8]={1,1,0,0,0,0,0,1};
+
+unsigned short steps1[8]={0x1040, 0x30C0, 0x2080, 0x6180, 0x4100, 0xC300, 0x8200, 0x9240};
+unsigned short steps2[8]={0x1240, 0x3200, 0x2300, 0x6100, 0x4180, 0xC080, 0x80C0, 0x9040};
+unsigned short steps3[8]={0x9040, 0x80C0, 0xC080, 0x4080, 0x6100, 0x2300, 0x3200, 0x1240};
+unsigned short steps4[8]={0x9240, 0x8200, 0xC300, 0x4100, 0x6180, 0x2080, 0x30C0, 0x1040};
+
+int counter=0;
+int c=0;
+
+#define DELAY_105uS asm volatile("REPEAT, #4201"); Nop();
+
+
+int main(int argc, char** argv)
+{
+AD1PCFGL=0xffff;        //makes them digital
+TRISB =0x0000;
+PORTB=0x0000;            //0=output
+TRISA =0xffff;		//1=INPUT
+
+speed=31000;
+
+   // scan();
+PLLFBD = 41;            //M=41+2 =43
+CLKDIVbits.PLLPOST =0;  //N=2
+CLKDIVbits.PLLPRE =0;   //N=2
+//FOSC = 7.37*(M/(N1*N2)) = 80MHz
+//FCY= FOSC/2 = 40MHz;
+ __builtin_write_OSCCONH(0x01);			/* New Oscillator FRC w/ PLL */
+ __builtin_write_OSCCONL(0x01);  		/* Enable Switch */
+
+	while(OSCCONbits.COSC != 0b001);		/* Wait for new Oscillator to become FRC w/ PLL */
+    while(OSCCONbits.LOCK != 1);			/* Wait for Pll to Lock */
+
+
+while(1)
+{
+    if(PORTAbits.RA0 ==1)
+    {
+    step_count1=0;
+        while(PORTAbits.RA0 ==1)
+        {
+            while(step_count1!=8)
+            {
+            PORTB= steps1[step_count1];
+       __delay32(speed);
+       step_count1++;
+            }
+            step_count1=0;
+        }
+    }
+    else if(PORTAbits.RA1 ==1)
+    {
+    step_count1=0;
+        while(PORTAbits.RA1 ==1)
+        {
+            while(step_count1!=8)
+            {
+            PORTB= steps2[step_count1];
+       __delay32(speed);
+       step_count1++;
+            }
+            step_count1=0;
+        }
+    }
+    else if(PORTAbits.RA2 ==1)
+    {
+    step_count1=0;
+        while(PORTAbits.RA2 ==1)
+        {
+            while(step_count1!=8)
+            {
+            PORTB= steps3[step_count1];
+       __delay32(speed);
+       step_count1++;
+            }
+            step_count1=0;
+        }
+    }
+    else if(PORTAbits.RA4 ==1)
+    {
+    step_count1=0;
+        while(PORTAbits.RA4 ==1)
+        {
+            while(step_count1!=8)
+            {
+            PORTB= steps4[step_count1];
+       __delay32(speed);
+       step_count1++;
+            }
+            step_count1=0;
+        }
+    }
+}
+
+
+}
+

@@ -1,0 +1,1472 @@
+
+#include <xc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "system.h"
+#include <p33FJ128MC802.h>
+#include <libpic30.h>
+#include <math.h>
+
+double speed=0;
+int step_count1;
+int step_count2;
+
+
+int step1[8]={0,0,0,0,0,1,1,1};
+int step2[8]={0,0,0,1,1,1,0,0};
+int step3[8]={0,1,1,1,0,0,0,0};
+int step4[8]={1,1,0,0,0,0,0,1};
+
+
+int loopend=0;
+int one_first=0;
+int half_block=0;
+int turn=0;
+int second=0;
+double pi=3.14159265;
+int counta=0;
+int turn_move=1;
+int ref_for;
+int search=0;
+int store =0;
+int store2=0;
+int was3=0;
+double y_count2=5;
+    int counter=0;
+    int scan_count=0;
+    int i =0;
+    int ii =0;
+    double Dist0=0;
+    int dist_0 =0;
+    double Dist1=0;
+    int dist_1=0;
+    double Dist2=0;
+    int dist_2=0;
+    double Dist3=0;
+    int dist_3=0;
+    double countA =0;
+    int counterb=0;
+    double degree=0;
+    int run_left=0;
+    int c=0;
+    int dist_00=0;
+    int dist_11=0;
+    int dist_22=0;
+    int dist_33=0;
+     int v=3;
+     int turn_count=0;
+
+    int degree_ff;
+    int degree_tt;
+    int degree_ta;
+    int forward_tt;
+    int forward_ff;
+    int forward_st;
+    int add;
+    int wall;
+    int yref=0;
+    int xref=0;
+    int count_coord;
+    int count_coord2;
+
+    double coord[542][4];
+    double movement[4][6];
+    int route[10][10][5];
+    int sroute[250][6];
+    int displays[250];
+    int route_count=0;
+    int contrl[4];   //=[0,0,0,0]
+    int move;
+    double x0_coord;
+    double y0_coord;
+    double x1_coord;
+    double y1_coord;
+    double x2_coord;
+    double y2_coord;
+    double x3_coord;
+    double y3_coord;
+    double y_pos=0;
+    int x_pos=0;
+    int ref_x;
+    int ref_y;
+    int ref_xd;
+    int ref_yd;
+    int counterc=0;
+    int outloop =0;
+    int count_disp=1;
+    int init_for=715;
+    int init_side=90;
+    int y_count=5;
+    int x_count=5;
+    int route_turn=0;
+    int exit1[6];
+    int end_count=0;
+    int z=0;
+int array_move[24];
+int cx=0;
+int cy=0;
+int rr=0;
+int a1;
+int b1;
+int c1;
+int d1;
+int e1;
+int f1;
+int g1;
+int h1;
+
+void turn_route(void)
+{
+ sroute[counterc][0]=ref_xd;
+sroute[counterc][1]=ref_yd;
+sroute[counterc][2]=1;
+sroute[counterc][3]=0;
+sroute[counterc][4]=1;
+sroute[counterc][5]=0;
+}
+
+void shortroute(int yposition2)
+{
+    cx=0;
+    cy=0;
+    rr=0;
+    while(cx<4)
+    {while(cy<6)
+        {array_move[rr]=movement[cx][cy];
+            cy++;
+            rr++; }
+        cx++;
+        cy=0;  }
+
+    if(yposition2 ==0)
+    { a1=3;
+        b1=1;
+        c1=7;
+        d1=9;
+        e1=13;
+        f1=15;
+        g1=19;
+        h1=21; }
+    else if(yposition2 ==-12)
+    {a1=2;
+        b1=12;
+        c1=23;
+        d1=11;
+        g1=20;
+        h1=16;}
+    else if(yposition2 ==12)
+    {a1=11;
+        b1=2;
+        e1=5;
+        f1=17;
+        g1=20;
+        h1=23;  }
+    sroute[counterc][0]=ref_xd;
+         sroute[counterc][1]=ref_yd;
+        if(array_move[a1]<wall&&array_move[b1]<wall)
+        {}
+        else{ sroute[counterc][3]=1;}
+        if(array_move[c1]<wall&&array_move[d1]<wall || yposition2==12)
+        {}
+        else{ sroute[counterc][2]=1;}
+        if(array_move[e1]<wall&&array_move[f1]<wall|| yposition2==-12)
+        {}
+        else{ sroute[counterc][4]=1;}
+        if(array_move[g1]<wall&&array_move[h1]<wall)
+        {}
+        else{ sroute[counterc][5]=1;}
+
+        if (turn ==3)
+        {
+        store = sroute[counterc][2];
+        store2 = sroute[counterc][4];
+        sroute[counterc][4]=store;
+        sroute[counterc][2]=store2;
+        store = sroute[counterc][3];
+        store2 = sroute[counterc][5];
+        sroute[counterc][5]=store;
+        sroute[counterc][3]=store2;
+        }
+}
+
+void route_info(int yposition)
+{
+    cx=0;
+    cy=0;
+    rr=0;
+    while(cx<4)
+    {while(cy<6)
+        {array_move[rr]=movement[cx][cy];
+            cy++;
+            rr++; }
+        cx++;
+        cy=0;  }
+
+    if(yposition ==0)
+    { a1=3;
+        b1=1;
+        c1=7;
+        d1=9;
+        e1=13;
+        f1=15;
+        g1=19;
+        h1=21; }
+    else if(yposition ==-12)
+    {a1=2;
+        b1=12;
+        c1=23;
+        d1=11;
+        g1=20;
+        h1=16;}
+    else if(yposition ==12)
+    {a1=11;
+        b1=2;
+        e1=5;
+        f1=17;
+        g1=20;
+        h1=23;  }
+
+    if((turn==0 || turn ==3) && (y_count2-floor(y_count2))==0)     //even = block
+        {
+        if(route[x_count][y_count][0]==12||route[x_count][y_count][0]==2)
+        {}
+        else
+        {
+        if(array_move[a1]<wall&&array_move[b1]<wall)
+        { route[x_count][y_count][0]=12;}
+        else
+        {route[x_count][y_count][0]=1;
+        route[x_count][y_count][4]=route[x_count][y_count][4]+1;}  }
+        if(route[x_count][y_count][1]==12||route[x_count][y_count][1]==2)
+        {}
+        else
+        {
+        if(array_move[c1]<wall&&array_move[d1]<wall || yposition==12)
+        { route[x_count][y_count][1]=12;}
+        else
+        {route[x_count][y_count][1]=1;
+        route[x_count][y_count][4]=route[x_count][y_count][4]+1;}}
+        if(route[x_count][y_count][2]==12||route[x_count][y_count][2]==2)
+        {}
+        else
+        {
+        if(array_move[e1]<wall&&array_move[f1]<wall|| yposition==-12)
+        { route[x_count][y_count][2]=12;}
+        else
+        {route[x_count][y_count][2]=1;
+        route[x_count][y_count][4]=route[x_count][y_count][4]+1;}}
+        if(route[x_count][y_count][3]==12||route[x_count][y_count][3]==2)
+        {}
+        else{
+        if(array_move[g1]<wall&&array_move[h1]<wall)
+        { route[x_count][y_count][3]=12;}
+        else
+        {route[x_count][y_count][3]=1;
+        route[x_count][y_count][4]=route[x_count][y_count][4]+1;}}
+
+        if (turn==3)
+        {
+        store = route[x_count][y_count][0];
+        store2 = route[x_count][y_count][3];
+        route[x_count][y_count][3]=store;
+        route[x_count][y_count][0]=store2;
+        store = route[x_count][y_count][1];
+        store2 = route[x_count][y_count][2];
+        route[x_count][y_count][2]=store;
+        route[x_count][y_count][1]=store2;
+         }
+        }
+}
+void __attribute__((__interrupt__)) _INT1Interrupt(void);
+
+void rotate(int degree0)    //stepper sensor
+{
+    counter=0;
+    step_count1=0;
+    while (counter<degree0)
+    {
+    //stepper motor (anti clock)
+       PORTBbits.RB9 = step1[step_count1]; //
+       c++;
+       PORTBbits.RB8 = step2[step_count1]; //
+       c++;
+       PORTBbits.RB7 = step3[step_count1]; //
+       c++;
+       PORTBbits.RB6 = step4[step_count1]; //
+       __delay32(speed*2);
+       step_count1++;
+       if(step_count1==7)
+       {counter++;
+       step_count1=0;}
+}
+}
+
+void rotate_back(int degree1)
+{
+    counter=0;
+    step_count1=7;
+    while (counter<degree1)
+    {
+    //stepper motor (anti clock)
+       PORTBbits.RB9 = step1[step_count1]; //
+       c++;
+       PORTBbits.RB8 = step2[step_count1]; //
+       c++;
+       PORTBbits.RB7 = step3[step_count1]; //
+       c++;
+       PORTBbits.RB6 = step4[step_count1]; //
+       __delay32(speed*2);
+       step_count1--;
+       if(step_count1==0)
+       {counter++;
+       step_count1=7;}
+}
+}
+
+void forward(int degree2)    //stepper sensor
+{
+PORTBbits.RB13=1;
+ __delay32(degree2*100000);      // 0.025s
+ PORTBbits.RB13=0;
+}
+
+void right_degree(int degree3)
+{
+    PORTBbits.RB15=1;
+      __delay32(degree3*100000);      // 0.025s
+ PORTBbits.RB15=0;
+}
+
+void left_degree(int degree4)
+{
+    PORTBbits.RB12=1;
+     __delay32(degree4*100000);       //0.025s
+ PORTBbits.RB12=0;
+}
+void backward(int degree5)
+{
+    PORTBbits.RB14=1;
+    __delay32(degree5*100000);      // 0.025s
+ PORTBbits.RB14=0;
+}
+
+void sensor_0(void)
+{
+    counterb=0;  //clear all values
+    Dist0=0;
+    dist_0 =0;
+    while(counterb<2)       //average two readings for accuracy
+    {
+    counter=0;
+    countA = 0;                 //send pulse
+    PORTBbits.RB3=1;		//RB3 - output
+    __delay32(4000);            //100us =(4000/40000000)
+    PORTBbits.RB3=0;
+        while(countA<200)
+        {
+        while(PORTAbits.RA0 ==1&& counter <20000)		//RA0 - input
+                {counter++; }
+                __delay32(1);
+                  countA++;}
+        counterb++;
+        Dist0 = (counter * 0.44 )/10 +38 ;
+        dist_0 = (dist_0 + Dist0)/counterb;   // +38 ; //distance into mm 
+                                             //moved to reference.
+    }
+    if(dist_0==38)  //no return pulse
+    {dist_0=800;}
+}
+void sensor_1(void)
+{
+//sensor 1 - RIGHT B3 out B12 in
+   counterb=0;  //clear all values
+    Dist1=0;
+    dist_1 =0;
+    while(counterb<2)
+    {
+    counter=0;
+    countA = 0;
+    PORTBbits.RB2=1;		//RB4 - output
+      __delay32(4000);
+    PORTBbits.RB2=0;
+        while(countA<200)
+        {
+        while(PORTAbits.RA1 ==1&& counter <20000)		//RA4 - input
+                {counter++; }
+        __delay32(1);
+              countA++;}
+    counterb++;
+        Dist1 = (counter * 0.44 )/10 +23;
+        dist_1 = (dist_1 + Dist1)/counterb;// + 23;
+    }
+        if(dist_1==23)  //no return pulse
+    {dist_1=800;}
+}
+
+void sensor_2(void)
+{
+//sensor 2 - BACK  B2 out B13 in
+    counterb=0;  //clear all values
+    Dist2=0;
+    dist_2 =0;
+    while(counterb<2)
+    {
+    counter=0;
+    countA = 0;
+    PORTBbits.RB4=1;		//RB4 - output
+      __delay32(4000);
+    PORTBbits.RB4=0;
+
+        while(countA<200)
+        {
+                while(PORTAbits.RA4 ==1&& counter <20000)		//RA4 - input
+                {
+                counter++;
+                }
+                __delay32(1);
+              countA++;
+       }
+    counterb++;
+        Dist2 = (counter * 0.44 )/10 +23;
+        dist_2 = (dist_2 + Dist2)/counterb;// +23;
+    }
+        if(dist_2==23)  //no return pulse
+    {dist_2=800;}
+}
+
+void sensor_3(void)
+{
+//sensor 3 LEFT B4 out A2 in
+    counterb=0;  //clear all values
+    Dist3=0;
+    dist_3 =0;
+    while(counterb<2)
+    {
+    counter=0;
+    countA = 0;
+    PORTBbits.RB5=1;		//RB4 - output
+      __delay32(4000);
+    PORTBbits.RB5=0;
+        while(countA<200)
+        {while(PORTAbits.RA2 ==1&& counter <20000)		//RA4 - input
+                {counter++;}
+        __delay32(1);
+              countA++;}
+    counterb++;
+        Dist3 = (counter * 0.44 )/10 +38;
+        dist_3 = (dist_3 + Dist3)/counterb;// +38;
+    }
+    if(dist_3==38)  //no return pulse
+    {dist_3=800;}
+}
+
+void scan(void)
+{
+    scan_count =0;
+    degree =0;
+    move=0;
+    second=0;
+    while(scan_count <23)
+    {
+    sensor_0();     //run each sensor for distance
+    sensor_1();
+    sensor_2();
+    sensor_3();
+
+    if(second==0)                   //every second distance is saved 
+    {                               //(every 15 degrees)
+    movement[0][move]=dist_0;       //save diatances into array [0][x]
+    movement[1][move]=dist_1;       //move 0-2 (0,1,2)
+    movement[2][move]=dist_2;
+    movement[3][move]=dist_3;
+    move++;
+    second=1;
+    }
+    else if(second==1)
+    {second=0;}
+    
+    if(turn ==0 || turn ==3)        //if forward or backward co ordinates
+    {
+        if(turn ==3)                //if backwards swap x and y distances for display
+        {
+            dist_00 = dist_3;
+            dist_11 = dist_2;
+            dist_22 = dist_1;
+            dist_33 = dist_0;
+        }else if(turn ==0)
+        {
+           dist_00 = dist_0;
+            dist_11 = dist_1;
+            dist_22 = dist_2;
+            dist_33 = dist_3;
+        }
+    if(dist_00 >180 || dist_00 <0)      //if distances out of wall range (ignore) 
+    {dist_00=0;}
+    if(dist_11 >180 || dist_11 <0)
+    {dist_11=0;}
+    if(dist_22 >180 || dist_22 <0)
+    {dist_22=0;}
+    if(dist_33 >180 || dist_33 <0)
+    {dist_33=0;}
+        //convert to coord
+        //scale the coordinated for display  
+    x0_coord= (dist_00*cos((2*pi/3)-degree))/3.2;    //x0    0-1-2        
+    y0_coord= (dist_00*sin((2*pi/3)-degree))/3.2;    //y0
+    x1_coord= (dist_11*cos((7*pi/6)-degree))/3.2;     //x1    3-4-5
+    y1_coord= (dist_11*sin((7*pi/6)-degree))/3.2;     //y1
+    x2_coord= (dist_22*cos((pi/6)-degree))/3.2;    //x2    6-7-8
+    y2_coord= (dist_22*sin((pi/6)-degree))/3.2;    //y2
+    x3_coord= (dist_33*cos((5*pi/3)-degree))/3.2;   //x3    9-10-11
+    y3_coord= (dist_33*sin((5*pi/3)-degree))/3.2;   //y3
+
+    coord[scan_count+24*counterc][0] = floor(x0_coord);               //x           //shift x y plane according to movement of car
+    coord[scan_count+24*counterc][1] = floor(x1_coord);                             //save in array to be sent and displayed
+    coord[scan_count+24*counterc][2] = floor(x2_coord);
+    coord[scan_count+24*counterc][3] = floor(x3_coord);
+    coord[scan_count+1+24*counterc][0] = -floor(y0_coord);             //y
+    coord[scan_count+1+24*counterc][1] = -floor(y1_coord);
+    coord[scan_count+1+24*counterc][2] = -floor(y2_coord);
+    coord[scan_count+1+24*counterc][3] = -floor(y3_coord);
+    }
+    degree= degree+(pi/24);
+    
+    scan_count=scan_count+2;
+    if(scan_count==24)
+    {rotate(132);            //rotate back to original
+    }else
+    {rotate_back(12);      //rotate 7.5 degrees
+    } }
+}
+
+void delayms(int ms)
+{
+   i = 0;
+  while ( i < ms )
+  {
+    i++;
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+  }
+}
+#define DELAY_105uS asm volatile("REPEAT, #4201"); Nop();
+int p=0;
+int q=0;
+int space=0;
+int three=0;
+int each[4];
+int kk=0;
+int uart_count=0;
+void __attribute__((__interrupt__)) _U1TXInterrupt(void)         
+{//if interrput on sending data clear flag and send coordinates
+IFS0bits.U1TXIF = 0; // Clear TX Interrupt flag
+if (uart_count<1345)
+{
+    uart_count=uart_count+1;
+    if(three==0)
+{
+    if(q==4)
+    { q=1;
+      p++;
+    }else
+    { q++; }
+
+each[3]=45;                          //send -
+each[2]= floor(coord[p][q-1]/100) +48;          //hunderds,tens ones then into ascii
+each[1]= floor(((coord[p][q-1]-(100*(each[2]-48)))/10)) +48;
+each[0]=(coord[p][q-1]-((100*(each[2]-48))+(10*(each[1]-48))));
+
+if(each[0]==0 ||each[0] == 1||each[0] == 2)
+{each[0]=1;}
+if(each[0]==3 ||each[0] == 4||each[0] == 5)
+{each[0]=4;}
+if(each[0]==6 ||each[0] == 7||each[0] == 8||each[0] == 9)
+{each[0]=7;}
+each[0]=each[0]+48;
+three=5;
+}
+
+three--;
+U1TXREG =each[three-1];
+}
+
+else
+{
+    q=1;
+    p=-1;
+    three =0;
+     if(three==0)
+{
+    if(q==0)
+    { q=1;
+    sroute[displays[p]][q]=-1*sroute[displays[p]][q];
+    }else if (q=1)
+    {  q=0;
+    p++;}
+sroute[displays[p]][q]=sroute[displays[p]][q]*18+350;
+ each[3]=35;                          //send -
+each[2]= floor(sroute[displays[p]][q]/100) +48;          //hunderds,tens ones then into ascii
+each[1]= floor(((sroute[displays[p]][q]-(100*(each[2]-48)))/10)) +48;
+each[0]=(sroute[displays[p]][q]-((100*(each[2]-48))+(10*(each[1]-48))));
+three--;
+
+     }
+U1TXREG =each[three-1];
+
+
+     }
+}
+
+void __attribute__((__interrupt__)) _INT1Interrupt(void)
+{
+//test recieved bits to create code
+//IFS1bits.INT1IF=0;
+}
+
+int main(int argc, char** argv) {
+RPINR0 = 11;
+//IFS1bits.INT1IF=0;
+//IEC1bits.INT1IE =1;
+
+AD1PCFGL=0xffff;        //makes them digital
+TRISB =0x0000;
+PORTB=0x000;            //0=output
+TRISA =0xffff;		//1=INPUT
+
+speed=40000;
+
+degree_ff =110;
+degree_tt=90;
+degree_ta=460;
+int forward_move=1550;
+int tt_move=1720;
+int ff_move=1700;
+int right=0;
+init_for=1550;
+wall=150;
+ref_x =350;     //reference display(0-400)
+ref_y =350;
+ref_xd = 0;     //reference short route(distances)
+ref_yd = 0;
+x_pos =1;
+y_pos =0;
+coord[290][0]= 45;
+counterc=0;
+int end =0;
+
+   // scan();
+PLLFBD = 41;            //M=41+2 =43
+CLKDIVbits.PLLPOST =0;  //N=2
+CLKDIVbits.PLLPRE =0;   //N=2
+//FOSC = 7.37*(M/(N1*N2)) = 80MHz
+//FCY= FOSC/2 = 40MHz;
+ __builtin_write_OSCCONH(0x01);			/* New Oscillator FRC w/ PLL */
+ __builtin_write_OSCCONL(0x01);  		/* Enable Switch */
+
+    while(OSCCONbits.COSC != 0b001);		/* Wait for new Oscillator to become FRC w/ PLL */
+    while(OSCCONbits.LOCK != 1);			/* Wait for Pll to Lock */
+
+//allow I/O to be changed
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bclr OSCCON, #6");
+
+        //assign uart1 to rp6
+        //u1tx to rp6 (b6)or pin 15
+	RPINR18bits.U1RXR = 11;      //0x0006 0110
+	RPOR5bits.RP11R = 0b00011;
+	//disallow I/O changes
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bset OSCCON, #6");
+
+U1MODEbits.STSEL = 0; // 1-Stop bit
+U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
+U1MODEbits.ABAUD = 0; // Auto-Baud disabled
+U1MODEbits.BRGH = 0; // Standard-Speed mode
+U1BRG = 259; // Baud Rate setting for 9600
+
+U1STAbits.URXISEL = 0;
+U1STAbits.RIDLE = 0;
+IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
+U1MODEbits.UARTEN = 1; // Enable UART
+
+__delay32(40000000);
+
+
+
+
+counterc=50;
+while(counterc<40)                          //movement
+{
+    __delay32(80000000);
+
+        scan();
+        if (turn==0||turn==3)
+        {
+        count_coord=0;
+        count_coord2=0;
+        while(count_coord2<12)
+        {
+        while(count_coord<4)
+        {
+            if(coord[24*counterc+2*count_coord2][count_coord]!=0)
+            {
+            coord[24*counterc+2*count_coord2][count_coord]=(coord[24*counterc+2*count_coord2][count_coord]+ref_x);
+            }
+            if(coord[24*counterc+2*count_coord2+1][count_coord]!=0)
+            {
+            coord[24*counterc+2*count_coord2+1][count_coord]=(coord[24*counterc+2*count_coord2+1][count_coord]+ref_y);
+            }
+            count_coord++;
+        }
+        count_coord2++;
+        count_coord=0;
+        }
+        }
+
+        shortroute(y_pos);
+
+    counterc++;
+
+if(y_pos == 0)                          //positon a
+{
+    route_info(0);
+
+        if(movement[1][3]>wall && movement[0][2]>wall && movement[2][1]>wall)
+        {
+            if (turn==0)
+            {sroute[counterc-1][3]=2;
+            route[x_count][y_count][1]=12;
+                turn=3;}
+            else if(turn==3)
+            {sroute[counterc-1][5]=2;
+                route[x_count][y_count][3]=12;
+                turn=0;}
+            else if(turn==1)
+            {sroute[counterc-1][2]=2;
+                route[x_count][y_count][0]=12;
+                turn=2;}
+            else if(turn==2)
+            {sroute[counterc-1][4]=2;
+                route[x_count][y_count][2]=12;
+                turn=1;}
+            left_degree(2*degree_ta);
+            route[x_count][y_count][4]=route[x_count][y_count][4]-1;
+        }
+
+    else if(turn==0|| turn==1 || turn ==2)
+    {
+        if((y_count2-floor(y_count2))!=0)
+         { half_block=1;}
+
+        while(loopend==0)
+        {
+            one_first=one_first+1;
+        if((route[x_count][y_count][1]==one_first) && turn==0 && half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][1]=12;
+            route[x_count-1][y_count][1]=12;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][1]=2;
+            route[x_count-1][y_count][1]=2;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+
+           left_degree(degree_ta);    //turn 90
+                ref_for=1;
+                 turn=1;
+                 loopend=1;
+        }
+        else if((route[x_count][y_count][0]==one_first)|| turn==1 || turn ==2 || half_block==1)
+        {
+            if(half_block==0&& route[x_count][y_count][4]==1)
+            {route[x_count][y_count][0]=12;
+            route[x_count][y_count+1][3]=12;
+            route[x_count][y_count+1][4]=route[x_count][y_count+1][4]-1;}
+            else if(half_block==0&& turn ==0)
+            {route[x_count][y_count][0]=2;
+            route[x_count][y_count+1][3]=2;
+            route[x_count][y_count+1][4]=route[x_count][y_count+1][4]+1;}
+             half_block=0;
+                if(movement[0][4] < wall||movement[0][3] < wall)
+                {left_degree(degree_tt);
+                    y_pos = -12;
+                    forward(tt_move);
+                    right_degree(degree_tt+right);
+                    if(turn==0)
+                    {ref_x=ref_x-18;
+                        ref_xd=ref_xd-1;}
+
+                      if((turn==1 && ref_for==1&&turn_count==1) || (ref_for==2&&turn_count==1&&turn==2))
+                        {ref_xd=ref_xd -2/(turn_move);
+                            ref_yd=ref_yd-1;
+                      turn_route();}
+                        if((turn==2 && ref_for==1&&turn_count==1) || (ref_for==2&&turn_count==1&&turn==1))
+                        { ref_xd=ref_xd +2/(turn_move);
+                            ref_yd=ref_yd +1;
+                        turn_route();}
+
+                }else if (movement[0][0] < wall || movement[0][1] < wall)
+                {right_degree(degree_tt+right);
+                    y_pos = 12;
+                    forward(tt_move);
+                    left_degree(degree_tt);
+                    if (turn==0)
+                    {ref_x=ref_x+18;
+                        ref_xd=ref_xd+1; }
+
+                      if((turn==1 &&ref_for==1&&turn_count==1 )||(ref_for==2&&turn_count==1 && turn==2))
+                        {ref_xd=ref_xd -2/(turn_move);
+                            ref_yd=ref_yd+1;
+                      turn_route();}
+                        if((turn==2&&ref_for==1&&turn_count==1 )||(ref_for==2&&turn_count==1 && turn==1))
+                        {ref_xd=ref_xd +2/(turn_move);
+                            ref_yd=ref_yd -1;
+                    turn_route();}
+
+                }else
+                {forward(init_for);
+                    y_pos = 0;
+                      if((turn==1 && ref_for==1&&turn_count==1)||(turn==2 && ref_for==2&&turn_count==1))
+                        { ref_xd=ref_xd -2/(turn_move);
+                      ref_x=ref_x-35;
+                      turn_route();}
+                        if((turn==2&& ref_for==1&&turn_count==1)||(turn==1 && ref_for==2&&turn_count==1))
+                        {ref_xd=ref_xd +2/(turn_move);
+                        ref_x=ref_x+35;
+                        turn_route();}
+        }
+             loopend=1;
+        }
+        else if((route[x_count][y_count][2]==one_first) && turn==0 &&half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][2]=12;
+            route[x_count+1][y_count][2]=12;
+            route[x_count+1][y_count][4]=route[x_count+1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][2]=2;
+            route[x_count+1][y_count][2]=2;
+            route[x_count+1][y_count][4]=route[x_count+1][y_count][4]+1;}
+            right_degree(degree_ta);
+                ref_for=1;
+                turn=2;
+                loopend=1;
+        }
+        else if(route[x_count][y_count][0]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+
+            left_degree(2*degree_ta);
+                turn=3;
+                loopend=1;
+        }
+        }
+    }
+ else if(turn==3)
+        {
+       if((y_count2-floor(y_count2))!=0)
+         {  half_block=1;}
+
+         while(loopend==0)
+        {
+            one_first=one_first+1;
+        if(route[x_count][y_count][1]==one_first && half_block==0)
+        {
+           if( route[x_count][y_count][4]==1)
+           {route[x_count][y_count][1]=12;
+           route[x_count-1][y_count][1]=12;
+           route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+           else
+            {route[x_count][y_count][1]=2;
+           route[x_count-1][y_count][1]=2;
+           route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+           right_degree(degree_ta);
+                ref_for=2;
+                turn=2;
+                loopend=1;
+        }
+        else if(route[x_count][y_count][3]==one_first || half_block==1 )
+        {
+         if(half_block==0 && route[x_count][y_count][4]==1)
+            {route[x_count][y_count][3]=12;
+         route[x_count][y_count-1][3]=12;
+         route[x_count][y_count-1][4]=route[x_count][y_count-1][4]-1;}
+         else if(half_block==0)
+            {route[x_count][y_count][3]=2;
+         route[x_count][y_count-1][3]=2;
+         route[x_count][y_count-1][4]=route[x_count][y_count-1][4]+1;}
+             half_block=0;
+             if(movement[0][4] < wall||movement[0][3] < wall)
+                {left_degree(degree_tt);
+                    y_pos = -12;
+                    forward(tt_move);
+                    right_degree(degree_tt+right);
+                        ref_x=ref_x+18;
+                        ref_xd=ref_xd+1;
+                }else if (movement[0][0] < wall || movement[0][1] < wall)
+                {right_degree(degree_tt+right);
+                    y_pos = 12;
+                    forward(tt_move);
+                    left_degree(degree_tt);
+                        ref_x=ref_x-18;
+                        ref_xd=ref_xd-1;
+                }else
+                {forward(init_for);
+                    y_pos = 0;
+                }
+             loopend=1;
+        }
+        else if((route[x_count][y_count][2]==one_first) && turn==3 && half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][2]=12;
+            route[x_count+1][y_count][2]=12;
+            route[x_count+1][y_count][4]=route[x_count+1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][2]=2;
+            route[x_count+1][y_count][2]=2;
+            route[x_count+1][y_count][4]=route[x_count+1][y_count][4]+1;}
+            left_degree(degree_ta);    //turn 90
+                ref_for=2;
+                turn=1;
+                loopend=1;
+        }
+        else if(route[x_count][y_count][3]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+
+            left_degree(2*degree_ta);
+            turn=0;
+            loopend=1;
+        }
+         }
+    }
+loopend=0;
+one_first=0;
+      if(turn ==0)
+     {ref_yd =ref_yd+2;
+     y_count2=y_count2+0.5;
+     y_count=floor(y_count2);
+     ref_y = ref_y -35;
+     }else if(turn ==3)
+     {ref_yd =ref_yd-2;
+      y_count2=y_count2-0.5;
+      y_count=ceil(y_count2);
+     ref_y = ref_y +35;}
+
+    if(turn==1 || turn==2)
+    { turn_count=turn_count+1; }
+    if(turn_count==2)
+    {
+     if((turn==1 && ref_for==1 )||(turn==2 && ref_for==2))
+     {   forward(init_for);
+            ref_xd= ref_xd-2;
+            ref_x=ref_x-35;
+            left_degree(degree_ta);
+            x_count=x_count-1;
+     }
+     else if((turn==2 && ref_for==1 )||(turn==1 && ref_for==2))
+       {    forward(init_for);  //-30
+            ref_xd= ref_xd+2;
+            ref_x=ref_x+35;
+            right_degree(degree_ta);
+            x_count=x_count+1;
+     }
+     if(ref_for==1)
+        {turn =3;}
+        if(ref_for==2)
+        {turn=0;}
+        ref_for=0;
+        turn_count=0;
+        turn_move=1;
+     }
+
+}else if(y_pos == 12)              //position b
+{
+             route_info(12);
+
+if(turn==0)
+    {
+    if((y_count2-floor(y_count2))!=0)
+    { half_block=1;}
+
+    while(loopend==0)
+        {
+            one_first=one_first+1;
+    if((route[x_count][y_count][0]==one_first)|| half_block==1)
+        {
+         if(half_block==0 &&route[x_count][y_count][4]==1)
+            {route[x_count][y_count][0]=12;
+            route[x_count][y_count+1][3]=12;
+         route[x_count][y_count+1][4]=route[x_count][y_count+1][4]-1;}
+            else if (half_block==0)
+            {route[x_count][y_count][0]=2;
+            route[x_count][y_count+1][3]=2;
+            route[x_count][y_count+1][4]=route[x_count][y_count+1][4]+1;}
+           half_block=0;
+         if (movement[1][4] < (wall))
+            {forward(forward_move);
+              y_pos = 12;
+         }else if (movement[0][4] < wall/2 || movement[0][5] < wall/2)
+            {left_degree(degree_ff);
+                forward(ff_move);   //-15
+                y_pos = -12;
+                right_degree(degree_ff+right);
+             ref_x =ref_x-35;
+         ref_xd =ref_xd-2;}
+         else
+           {left_degree(degree_tt);
+                forward(tt_move);
+                y_pos = 0;
+                right_degree(degree_tt+right);
+             ref_x =ref_x-18;
+         ref_xd =ref_xd-1;}
+           loopend=1;
+        }
+        else if(route[x_count][y_count][2]==one_first &&half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][1]=12;
+            route[x_count-1][y_count][1]=12;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][1]=2;
+            route[x_count-1][y_count][1]=2;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+                    turn=2;
+                    ref_for=1;
+                turn_move=2;
+                y_pos=0;
+                loopend=1;
+        }
+        else if(route[x_count][y_count][0]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+
+            left_degree(2*degree_ta);
+                turn=3;
+                loopend=1;
+        }
+    }
+    }
+    if(turn==3)
+    {
+        if((y_count2-floor(y_count2))!=0)
+    {half_block=1;}
+
+         while(loopend==0)
+        {
+            one_first=one_first+1;
+        if(route[x_count][y_count][1]==one_first && half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][1]=12;
+            route[x_count-1][y_count][1]=12;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][1]=2;
+            route[x_count-1][y_count][1]=2;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+           right_degree(degree_ta);
+                    turn=2;
+                    ref_for=2;
+                turn_move=2;
+                y_pos=0;
+                loopend=1;
+        }
+        else if((route[x_count][y_count][3]==one_first)||half_block==1)
+        {
+           if(half_block==0 &&route[x_count][y_count][4]==1)
+            {route[x_count][y_count][3]=12;
+            route[x_count][y_count-1][3]=12;
+           route[x_count][y_count-1][4]=route[x_count][y_count-1][4]-1;}
+            else if(half_block==0)
+            {route[x_count][y_count][3]=2;
+            route[x_count][y_count-1][3]=2;
+            route[x_count][y_count-1][4]=route[x_count][y_count-1][4]+1;}
+            half_block=0;
+          if (movement[1][4] < wall || movement[1][5] < wall)
+                {forward(forward_move);
+                    y_pos = 12;
+                }else if (movement[0][4] < wall/2 || movement[0][5] < wall/2)
+                {left_degree(degree_ff);
+                    forward(ff_move);   //-15
+                    y_pos = -12;
+                    right_degree(degree_ff+right);
+                    ref_x =ref_x+35;
+                    ref_xd =ref_xd+2;
+                }else
+                {
+                    left_degree(degree_tt);
+                    forward(tt_move);
+                    y_pos = 0;
+                    right_degree(degree_tt+right);
+                    ref_x =ref_x+18;
+                    ref_xd =ref_xd+1;
+                    }
+            loopend=1;
+        }
+        else if(route[x_count][y_count][3]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+
+            left_degree(2*degree_ta);
+            turn=0;
+            loopend=1;
+        }
+       }
+    }
+             one_first=0;
+             loopend=0;
+       if(turn==1&& turn==2)
+        {turn_count=turn_count+1;}
+
+      if(turn ==0)
+     {ref_yd =ref_yd+2;
+     y_count2=y_count2+0.5;
+     ref_y = ref_y -35;
+     }else if(turn ==3)
+     {ref_yd =ref_yd-2;
+     y_count2=y_count2-0.5;
+     ref_y = ref_y +35;}
+      y_count=floor(y_count2);
+
+}else if(y_pos == -12)               //position c
+{
+            route_info(-12);
+
+ if(turn==0)
+    {
+     if((y_count2-floor(y_count2))!=0)
+    { half_block=1;}
+
+     while(loopend==0)
+        {
+            one_first=one_first+1;
+     if(route[x_count][y_count][1]==one_first && half_block==0)
+        {
+         if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][1]=12;
+            route[x_count-1][y_count][1]=12;
+         route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][1]=2;
+            route[x_count-1][y_count][1]=2;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+           left_degree(degree_ta);    //turn 90
+                turn=1;
+                turn_move=2;
+                y_pos=0;
+                loopend=1;
+        }
+        else if((route[x_count][y_count][0]==one_first)||half_block==1)
+        {
+            if(half_block==0 &&route[x_count][y_count][4]==1)
+            {route[x_count][y_count][0]=12;
+            route[x_count][y_count+1][3]=12;
+            route[x_count][y_count+1][4]=route[x_count][y_count+1][4]-1;}
+            else if(half_block==0)
+            {route[x_count][y_count][0]=2;
+            route[x_count][y_count+1][3]=2;
+            route[x_count][y_count+1][4]=route[x_count][y_count+1][4]+1;}
+         if (movement[1][4] < wall/2 || movement[1][5] < wall/2)
+            {right_degree(degree_ff+right);
+                forward(ff_move);  //-15
+                y_pos = 12;
+                left_degree(degree_ff);
+                ref_x =ref_x+35;
+                ref_xd =ref_xd+2;
+            }else if (movement[0][4] < (wall+60) || movement[0][5] < (wall+60))
+            {   forward(forward_move);
+                y_pos = -12;
+            }else
+            {
+                right_degree(degree_tt+right);
+                forward(tt_move);
+                y_pos = 0;
+                left_degree(degree_tt);
+                ref_x =ref_x+18;
+                ref_xd =ref_xd+1;
+            }
+            loopend=1;
+        }
+        else if(route[x_count][y_count][0]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+            left_degree(2*degree_ta);
+                turn=3;
+                loopend=1;
+        }
+     }
+    }
+    if(turn==3)
+    {
+        if((y_count2-floor(y_count2))!=0)
+            {half_block=1;}
+
+    while(loopend==0)
+        {
+            one_first=one_first+1;
+       if((route[x_count][y_count][3]==one_first)||half_block==1)
+        {
+         if(half_block==0 &&route[x_count][y_count][4]==1)
+            {route[x_count][y_count][3]=12;
+            route[x_count][y_count-1][3]=12;
+         route[x_count][y_count-1][4]=route[x_count][y_count-1][4]-1;}
+            else if(half_block==0)
+            {route[x_count][y_count][3]=2;
+            route[x_count][y_count-1][3]=2;
+            route[x_count][y_count-1][4]=route[x_count][y_count-1][4]+1;}
+         half_block=0;
+         if (movement[1][4] < wall/2 || movement[1][5] < wall/2)
+            {right_degree(degree_ff);
+                forward(ff_move);   //-15
+                y_pos = 12;
+                left_degree(degree_ff);
+                ref_x =ref_x-35;
+                ref_xd =ref_xd-2;
+            }else if (movement[0][4] < wall || movement[0][5] < wall)
+            {   forward(forward_move);
+                y_pos = -12;
+            }else
+            {
+                right_degree(degree_tt);
+                forward(tt_move);
+                y_pos = 0;
+                left_degree(degree_tt);
+                ref_x =ref_x-18;
+                ref_xd =ref_xd-1;
+            }
+         loopend=1;
+        }
+        else if(route[x_count][y_count][2]==one_first && half_block==0)
+        {
+            if(route[x_count][y_count][4]==1)
+            {route[x_count][y_count][2]=12;
+            route[x_count-1][y_count][2]=12;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]-1;}
+            else
+            {route[x_count][y_count][2]=2;
+            route[x_count-1][y_count][2]=2;
+            route[x_count-1][y_count][4]=route[x_count-1][y_count][4]+1;}
+            left_degree(degree_ta);    //turn 90
+                turn=1;
+                turn_move=2;
+                y_pos=0;
+                loopend=1;
+        }
+        else if(route[x_count][y_count][3]==12 && route[x_count][y_count][1]==12 &&route[x_count][y_count][2]==12)
+        {
+            left_degree(2*degree_ta);
+            turn=0;
+            loopend=1;
+        }
+    }
+    }
+             if(turn==1&& turn==2)
+        {turn_count=turn_count+1;}
+
+      if(turn ==0)
+     {ref_yd =ref_yd+1;
+      y_count2=y_count2+0.5;
+      ref_y = ref_y -35;
+     }else if(turn ==3)
+     {ref_yd =ref_yd-1;
+      y_count2=y_count2-0.5;
+     ref_y = ref_y +35;}
+       y_count=floor(y_count2);
+}
+
+}
+         ii=1;
+    if(ii==0)
+    {
+//allow I/O to be changed
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bclr OSCCON, #6");
+
+        //assign uart1 to rp6
+        //u1tx to rp6 (b6)or pin 15
+	RPINR18bits.U1RXR = 7;      //0x0006 0110
+	RPOR3bits.RP6R = 0b00011;
+	//disallow I/O changes
+	asm volatile ("mov #OSCCONL, w1  \n"
+				  "mov #0x46, w2     \n"
+				  "mov #0x57, w3     \n"
+				  "mov.b w2, [w1]    \n"
+				  "mov.b w3, [w1]    \n"
+				  "bset OSCCON, #6");
+
+        U1MODEbits.STSEL = 0; // 1-Stop bit
+U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
+U1MODEbits.ABAUD = 0; // Auto-Baud disabled
+U1MODEbits.BRGH = 0; // Standard-Speed mode
+U1BRG = 259; // Baud Rate setting for 9600
+U1STAbits.UTXISEL0 = 0; // Interrupt after one TX character is transmitted
+U1STAbits.UTXISEL1 = 0;
+U1STAbits.UTXINV = 1; // INVERT
+IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
+U1MODEbits.UARTEN = 1; // Enable UART
+U1STAbits.UTXEN = 1; // Enable UART TX
+/* Wait at least 105 microseconds (1/9600) before sending first char */
+DELAY_105uS
+    }
+ int cnt=0;
+while(1)
+{
+     cnt=0;
+    while(cnt<100)
+    {
+        __delay32(100);
+        cnt++;
+    }
+        PORTB=0x0000;
+}
+
+//short_alg();
+
+}
+
+
+
+void short_alg(void)
+{
+    int counterp=0;
+    int prev_route=0;
+    int distance=0;
+    int dist_x=0;
+    int dist_y=0;
+    counterc=0;
+    int dis_count=0;
+
+    while(counterc<250)
+    {    if(sroute[counterc][2]==2||sroute[counterc][3]==2||sroute[counterc][4]==2||sroute[counterc][5]==2)
+        {counterp=counterc;
+    ref_xd= sroute[counterp][0];
+    ref_yd= sroute[counterp][1];}
+    counterc++; }
+
+ if(sroute[counterp][2]==2)
+        {sroute[counterp][2]==0; }
+        if(sroute[counterp][3]==2)
+        {sroute[counterp][3]==0; }
+        if(sroute[counterp][4]==2)
+        {sroute[counterp][4]==0;}
+        if(sroute[counterp][5]==2)
+        {sroute[counterp][5]==0; }
+
+    int enda=0;
+    while(enda!=1)
+    {
+        dis_count=dis_count+1;
+if(sroute[counterp][2]==2 ||sroute[counterp][3]==2 || sroute[counterp][4]==2||sroute[counterp][5]==2)
+    {enda=1;
+     counterp=0;
+     while(sroute[counterp][2]!=3)
+     {counterp++;
+     }}
+
+    if(sroute[counterp][2]==1)
+    {
+    sroute[counterp][2]==0;
+    ref_xd=ref_xd-2;
+    prev_route =3;
+    dist_x=fabs(sroute[counterp][0]-ref_xd);
+    dist_y=sroute[counterp][1];
+    if(sroute[counterp][3]==1 || sroute[counterp][4]==1||sroute[counterp][5]==1)
+    {
+        sroute[counterp][2]==3;
+
+    }
+    }
+    else if(sroute[ref_xd][3]==1)
+    {
+    sroute[counterp][3]==0;
+    ref_yd=ref_yd+2;
+    prev_route =4;
+    dist_x=sroute[counterp][0];
+    dist_y=fabs(ref_yd-sroute[counterp][1]);
+    if(sroute[counterp][4]==1||sroute[counterp][5]==1)
+    {
+        sroute[counterp][2]==3;
+    }
+    }
+    else if(sroute[counterp][4]==1)
+    {
+     sroute[counterp][4]==0;
+    ref_xd=ref_xd+2;
+    prev_route =1;
+    dist_x=fabs(ref_xd -sroute[counterp][0]);
+    dist_y=sroute[counterp][1];
+    if(sroute[counterp][5]==1)
+    {
+        sroute[counterp][2]==3;
+    }
+    }
+    else if(sroute[counterp][5]==1)
+    {
+     sroute[counterp][5]==0;
+    ref_yd=ref_yd-2;
+    prev_route =2;
+    dist_x=sroute[counterp][0];
+    dist_y=fabs(sroute[counterp][1]-ref_yd);
+    }
+    else
+    {
+        dis_count=dis_count-1;
+        ref_xd = sroute[displays[dis_count]][0];
+        ref_yd = sroute[displays[dis_count]][1];
+    }
+
+     distance=distance+sqrt(pow(dist_x,2)+pow(dist_y,2));
+     displays[dis_count]=counterp;
+     counterp=0;
+     while(sroute[counterp][0]!=ref_xd && sroute[counterp][1]!=ref_yd)
+     {
+         counterp++;
+     }
+if(prev_route==1)
+    { sroute[counterp][2]==0;}
+else if(prev_route==2)
+    { sroute[counterp][3]==0;}
+else if(prev_route==3)
+    { sroute[counterp][4]==0;}
+else if(prev_route==4)
+    { sroute[counterp][5]==0;}
+    }
+}
+
+int temp;
+int ucount=0;
+void __attribute__((__interrupt__)) _U1RXInterrupt(void)         //if interrput on sending data clear flag and send coordinates
+{
+    temp= U1RXREG;
+   if(temp==228)
+    {
+        PORTB=0x8000;
+    }
+    else if(temp==144)
+    {
+        PORTB=0x4000;
+    }
+    else if(temp==34)
+    {
+        PORTB=0x2000;
+    }
+    else if(temp==32)
+    {
+        PORTB=0x1000;
+    }
+    
+    IFS0bits.U1RXIF = 0; // Clear TX Interrupt flag
+
+}
